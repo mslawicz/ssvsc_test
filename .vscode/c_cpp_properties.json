@@ -1,0 +1,13 @@
+{
+    "configurations": [
+        {
+            "name": "ssvsc_test",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "compilerPath": ""
+        }
+    ],
+    "version": 4
+}
