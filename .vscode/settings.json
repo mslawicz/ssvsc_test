@@ -1,3 +1,6 @@
 {
-    "cmake.sourceDirectory": "${workspaceFolder}/ssvsc_test_cmake"
+    "cmake.sourceDirectory": "${workspaceFolder}/ssvsc_test_cmake",
+    "files.associations": {
+        "sl_component_catalog.h": "c"
+    }
 }
