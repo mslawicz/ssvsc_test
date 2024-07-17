@@ -2,9 +2,7 @@
     "configurations": [
         {
             "name": "ssvsc_test",
-            "includePath": [
-                "${workspaceFolder}/**"
-            ],
+            "configurationProvider": "ms-vscode.cmake-tools",
             "defines": [],
             "compilerPath": ""
         }
