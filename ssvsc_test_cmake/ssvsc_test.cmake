@@ -1,5 +1,7 @@
-set(SDK_PATH "C:/Users/ep14231/SimplicityStudio/SDKs/simplicity_sdk")
+set(SDK_PATH "${CMAKE_SOURCE_DIR}/../../../SDKs/simplicity_sdk")
 set(COPIED_SDK_PATH "simplicity_sdk_2024.6.0")
+message(CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+message(PROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 
 add_library(slc_ssvsc_test OBJECT
     "${SDK_PATH}/hardware/board/src/sl_board_control_gpio.c"
