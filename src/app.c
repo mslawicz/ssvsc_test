@@ -16,12 +16,17 @@
  ******************************************************************************/
 #include "blink.h"
 
+#include "em_gpio.h"
+#include "pin_config.h"
+
 /***************************************************************************//**
  * Initialize application.
  ******************************************************************************/
 void app_init(void)
 {
   blink_init();
+
+  GPIO_PinModeSet(test_out_1_PORT, test_out_1_PIN, gpioModePushPull, 0);
 }
 
 /***************************************************************************//**
@@ -30,4 +35,6 @@ void app_init(void)
 void app_process_action(void)
 {
   blink_process_action();
+
+  GPIO_PinOutToggle(test_out_1_PORT, test_out_1_PIN);
 }

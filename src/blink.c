@@ -28,7 +28,7 @@
 #endif
 
 #ifndef TOOGLE_DELAY_MS
-#define TOOGLE_DELAY_MS         100
+#define TOOGLE_DELAY_MS         500
 #endif
 
 /*******************************************************************************

@@ -1,6 +1,7 @@
 {
     "cmake.sourceDirectory": "${workspaceFolder}/ssvsc_test_cmake",
     "files.associations": {
-        "sl_component_catalog.h": "c"
+        "sl_component_catalog.h": "c",
+        "em_gpio.h": "c"
     }
 }
