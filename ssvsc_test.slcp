@@ -33,6 +33,7 @@ component:
 - {id: brd2704a}
 - {id: clock_manager}
 - {id: device_init}
+- {id: dmadrv}
 - instance: [pulse_1]
   id: pwm
 - instance: [led0]
