@@ -18,6 +18,7 @@
 
 #include "em_gpio.h"
 #include "pin_config.h"
+#include "sl_simple_led_instances.h"
 
 /***************************************************************************//**
  * Initialize application.
@@ -34,7 +35,12 @@ void app_init(void)
  ******************************************************************************/
 void app_process_action(void)
 {
+  sl_led_state_t led_state_prev = sl_led_get_state(&sl_led_led0);
   blink_process_action();
+  if(sl_led_get_state(&sl_led_led0) != led_state_prev)
+  {
+    // led state changed
+    GPIO_PinOutToggle(test_out_1_PORT, test_out_1_PIN);
+  }
 
-  GPIO_PinOutToggle(test_out_1_PORT, test_out_1_PIN);
 }
