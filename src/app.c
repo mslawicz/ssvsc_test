@@ -20,6 +20,12 @@
 #include "pin_config.h"
 #include "sl_simple_led_instances.h"
 #include "sl_pwm_instances.h"
+#include "em_ldma.h"
+
+#define PWM_SIZE  4
+uint8_t pwmBuffer[PWM_SIZE] = { 10, 25, 50, 75};
+LDMA_TransferCfg_t ldmaTimer0Cfg;
+LDMA_Descriptor_t ldmaTimer0Desc;
 
 /***************************************************************************//**
  * Initialize application.
@@ -31,6 +37,12 @@ void app_init(void)
   GPIO_PinModeSet(test_out_1_PORT, test_out_1_PIN, gpioModePushPull, 0);
   sl_pwm_set_duty_cycle(&sl_pwm_pulse_1, 10);
   sl_pwm_start(&sl_pwm_pulse_1);
+
+  ldmaTimer0Cfg = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(ldmaPeripheralSignal_TIMER0_UFOF);
+  ldmaTimer0Desc = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_M2P_BYTE(pwmBuffer, &TIMER0->CC[0].OCB, PWM_SIZE);
+
+  LDMA_Init_t ldmaInit = LDMA_INIT_DEFAULT;
+  LDMA_Init(&ldmaInit);
 }
 
 /***************************************************************************//**
@@ -51,6 +63,7 @@ void app_process_action(void)
     {
       duty = 10;
     }
+    LDMA_StartTransfer(0, &ldmaTimer0Cfg, &ldmaTimer0Desc);
   }
 
 }
