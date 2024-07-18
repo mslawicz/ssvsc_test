@@ -3,6 +3,7 @@
     "files.associations": {
         "sl_component_catalog.h": "c",
         "em_gpio.h": "c",
-        "sl_simple_led_instances.h": "c"
+        "sl_simple_led_instances.h": "c",
+        "sl_pwm_instances.h": "c"
     }
 }
