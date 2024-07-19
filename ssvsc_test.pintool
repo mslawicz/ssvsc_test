@@ -8,9 +8,15 @@
     <property object="PD03" propertyId="pin.reserve" value="Reserved"/>
     <property object="PORTIO" propertyId="portio.timer0.enable.cc0" value="Enabled"/>
     <property object="PORTIO" propertyId="portio.timer0.location.cc0" value="50"/>
+    <property object="PORTIO" propertyId="portio.usart0.enable.rx" value="Enabled"/>
+    <property object="PORTIO" propertyId="portio.usart0.enable.tx" value="Enabled"/>
+    <property object="PORTIO" propertyId="portio.usart0.location.rx" value="48"/>
+    <property object="PORTIO" propertyId="portio.usart0.location.tx" value="49"/>
     <property object="TIMER0" propertyId="ABModule.selectedRequirement" value="timer%T%SL_PWM_PULSE_1%T%sl_pwm_init_pulse_1_config.h"/>
     <property object="TIMER0" propertyId="ABPeripheral.included" value="true"/>
     <property object="TIMER0" propertyId="channel.0.name" value="OUTPUT"/>
+    <property object="USART0" propertyId="ABModule.selectedRequirement" value="usart%T%SL_UARTDRV_USART_USART_TEST%T%sl_uartdrv_usart_usart_test_config.h"/>
+    <property object="USART0" propertyId="ABPeripheral.included" value="true"/>
   </mode>
   <modeTransition>
     <property object="RESET &#x2192; DefaultMode" propertyId="modeTransition.source" value="RESET"/>

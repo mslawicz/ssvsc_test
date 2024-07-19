@@ -13,3 +13,5 @@ sl_memory_manager_region_config.h=1585140969
 sl_pwm_init_pulse_1_config.h=-109343942
 sl_simple_led_led0_config.h=-917927416
 sl_sleeptimer_config.h=1360009810
+sl_uartdrv_usart_usart_test_config.h=-2040151526
+uartdrv_config.h=-941504238

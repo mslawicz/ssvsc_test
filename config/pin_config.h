@@ -94,6 +94,22 @@
 // [TIMER4]$
 
 // $[USART0]
+// USART0 RX on PD00
+#ifndef USART0_RX_PORT                          
+#define USART0_RX_PORT                           gpioPortD
+#endif
+#ifndef USART0_RX_PIN                           
+#define USART0_RX_PIN                            0
+#endif
+
+// USART0 TX on PD01
+#ifndef USART0_TX_PORT                          
+#define USART0_TX_PORT                           gpioPortD
+#endif
+#ifndef USART0_TX_PIN                           
+#define USART0_TX_PIN                            1
+#endif
+
 // [USART0]$
 
 // $[I2C1]

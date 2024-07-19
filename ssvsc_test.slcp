@@ -40,6 +40,9 @@ component:
   id: simple_led
 - {id: sl_system}
 - {id: sleeptimer}
+- {id: uartdrv_core}
+- instance: [usart_test]
+  id: uartdrv_usart
 define:
 - {name: DEBUG_EFM}
 ui_hints:
