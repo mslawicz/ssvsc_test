@@ -21,6 +21,7 @@
 #include "sl_simple_led_instances.h"
 #include "sl_pwm_instances.h"
 #include "em_ldma.h"
+#include "sl_uartdrv_instances.h"
 
 /**
  * @brief
@@ -94,6 +95,7 @@ void app_process_action(void)
       duty = 10;
     }
     LDMA_StartTransfer(0, &ldmaTimer0Cfg, &ldmaTimer0Desc);
+    UARTDRV_TransmitB(sl_uartdrv_usart_usart_test_handle, &duty, 1);
   }
 
 }

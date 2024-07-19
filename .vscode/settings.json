@@ -6,6 +6,8 @@
         "sl_simple_led_instances.h": "c",
         "sl_pwm_instances.h": "c",
         "em_ldma.h": "c",
-        "pin_config.h": "c"
+        "pin_config.h": "c",
+        "sl_uartdrv_instances.h": "c",
+        "uartdrv.h": "c"
     }
 }
