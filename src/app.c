@@ -22,15 +22,43 @@
 #include "sl_pwm_instances.h"
 #include "em_ldma.h"
 
-#define PWM_SIZE  4
-uint8_t pwmBuffer[PWM_SIZE] = { 50, 25, 10, 75};
-LDMA_TransferCfg_t ldmaTimer0Cfg;
-LDMA_Descriptor_t ldmaTimer0Desc;
+/**
+ * @brief
+ *   DMA descriptor initializer for word transfers from memory to a peripheral.
+ * @param[in] src       Source data address.
+ * @param[in] dest      Peripheral data register destination address.
+ * @param[in] count     Number of words to transfer.
+ */
+#define LDMA_DESCRIPTOR_SINGLE_M2P_WORD(src, dest, count) \
+  {                                                       \
+    .xfer =                                               \
+    {                                                     \
+      .structType   = ldmaCtrlStructTypeXfer,             \
+      .structReq    = 0,                                  \
+      .xferCnt      = (count) - 1,                        \
+      .byteSwap     = 0,                                  \
+      .blockSize    = ldmaCtrlBlockSizeUnit1,             \
+      .doneIfs      = 1,                                  \
+      .reqMode      = ldmaCtrlReqModeBlock,               \
+      .decLoopCnt   = 0,                                  \
+      .ignoreSrec   = 0,                                  \
+      .srcInc       = ldmaCtrlSrcIncOne,                  \
+      .size         = ldmaCtrlSizeWord,                   \
+      .dstInc       = ldmaCtrlDstIncNone,                 \
+      .srcAddrMode  = ldmaCtrlSrcAddrModeAbs,             \
+      .dstAddrMode  = ldmaCtrlDstAddrModeAbs,             \
+      .srcAddr      = (uint32_t)(src),                    \
+      .dstAddr      = (uint32_t)(dest),                   \
+      .linkMode     = 0,                                  \
+      .link         = 0,                                  \
+      .linkAddr     = 0                                   \
+    }                                                     \
+  }
 
-uint8_t src[PWM_SIZE];
-uint8_t dst[PWM_SIZE];
-static const LDMA_TransferCfg_t transferCfg = LDMA_TRANSFER_CFG_MEMORY();
-static const LDMA_Descriptor_t desc = LDMA_DESCRIPTOR_SINGLE_M2M_BYTE(src, dst, 4);
+#define PWM_SIZE  4
+uint32_t pwmBuffer[PWM_SIZE] = { 99, 2225, 10, 7775};
+static const LDMA_TransferCfg_t ldmaTimer0Cfg = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(ldmaPeripheralSignal_TIMER0_UFOF);
+static const LDMA_Descriptor_t ldmaTimer0Desc = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_M2P_WORD(pwmBuffer, &TIMER0->CC[0].OCB, PWM_SIZE);
 
 /***************************************************************************//**
  * Initialize application.
@@ -41,8 +69,7 @@ void app_init(void)
 
   GPIO_PinModeSet(test_out_1_PORT, test_out_1_PIN, gpioModePushPull, 0);
   sl_pwm_set_duty_cycle(&sl_pwm_pulse_1, 10);
-  sl_pwm_start(&sl_pwm_pulse_1);
-
+  //sl_pwm_start(&sl_pwm_pulse_1);
 
   LDMA_Init_t ldmaInit = LDMA_INIT_DEFAULT;
   LDMA_Init(&ldmaInit);
@@ -66,14 +93,7 @@ void app_process_action(void)
     {
       duty = 10;
     }
-    //ldmaTimer0Cfg = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(ldmaPeripheralSignal_TIMER0_UFOF);
-    //ldmaTimer0Desc = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_M2P_BYTE(pwmBuffer, &TIMER0->CC[0].OCB, PWM_SIZE);
-    //LDMA_StartTransfer(0, &ldmaTimer0Cfg, &ldmaTimer0Desc);
-    src[0] = duty;
-    src[1] = duty+1;
-    src[2] = duty+2;
-    src[3] = duty+3;
-    LDMA_StartTransfer(0, &transferCfg, &desc);
+    LDMA_StartTransfer(0, &ldmaTimer0Cfg, &ldmaTimer0Desc);
   }
 
 }
