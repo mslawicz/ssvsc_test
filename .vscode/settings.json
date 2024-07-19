@@ -5,6 +5,7 @@
         "em_gpio.h": "c",
         "sl_simple_led_instances.h": "c",
         "sl_pwm_instances.h": "c",
-        "em_ldma.h": "c"
+        "em_ldma.h": "c",
+        "pin_config.h": "c"
     }
 }
