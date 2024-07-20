@@ -58,8 +58,8 @@
 
 #define PWM_SIZE  4
 uint32_t pwmBuffer[PWM_SIZE] = { 99, 2225, 10, 7775};
-static const LDMA_TransferCfg_t ldmaTimer0Cfg = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(ldmaPeripheralSignal_TIMER0_UFOF);
-static const LDMA_Descriptor_t ldmaTimer0Desc = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_M2P_WORD(pwmBuffer, &TIMER0->CC[0].OCB, PWM_SIZE);
+//static const LDMA_TransferCfg_t ldmaTimer0Cfg = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(ldmaPeripheralSignal_TIMER0_UFOF);
+//static const LDMA_Descriptor_t ldmaTimer0Desc = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_M2P_WORD(pwmBuffer, &TIMER0->CC[0].OCB, PWM_SIZE);
 
 /***************************************************************************//**
  * Initialize application.
@@ -70,10 +70,10 @@ void app_init(void)
 
   GPIO_PinModeSet(test_out_1_PORT, test_out_1_PIN, gpioModePushPull, 0);
   sl_pwm_set_duty_cycle(&sl_pwm_pulse_1, 10);
-  //sl_pwm_start(&sl_pwm_pulse_1);
+  sl_pwm_start(&sl_pwm_pulse_1);
 
-  LDMA_Init_t ldmaInit = LDMA_INIT_DEFAULT;
-  LDMA_Init(&ldmaInit);
+  //LDMA_Init_t ldmaInit = LDMA_INIT_DEFAULT;
+  //LDMA_Init(&ldmaInit);
 }
 
 /***************************************************************************//**
@@ -94,8 +94,9 @@ void app_process_action(void)
     {
       duty = 10;
     }
-    LDMA_StartTransfer(0, &ldmaTimer0Cfg, &ldmaTimer0Desc);
+    //LDMA_StartTransfer(0, &ldmaTimer0Cfg, &ldmaTimer0Desc);
     UARTDRV_TransmitB(sl_uartdrv_usart_usart_test_handle, &duty, 1);
+    //UARTDRV_ForceTransmit(sl_uartdrv_usart_usart_test_handle, &duty, 1);
   }
 
 }
