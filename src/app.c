@@ -60,6 +60,18 @@
 uint32_t pwmBuffer[PWM_SIZE] = { 99, 2225, 10, 7775};
 //static const LDMA_TransferCfg_t ldmaTimer0Cfg = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(ldmaPeripheralSignal_TIMER0_UFOF);
 //static const LDMA_Descriptor_t ldmaTimer0Desc = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_M2P_WORD(pwmBuffer, &TIMER0->CC[0].OCB, PWM_SIZE);
+uint8_t UART_buf[3];
+
+void UART_cbk(UARTDRV_Handle_t handle,
+              Ecode_t transferStatus,
+              uint8_t *data,
+              UARTDRV_Count_t transferCount)
+{
+  (void)handle;
+  (void)transferStatus;
+  (void)data;
+  (void)transferCount;
+}
 
 /***************************************************************************//**
  * Initialize application.
@@ -87,7 +99,6 @@ void app_process_action(void)
   if(sl_led_get_state(&sl_led_led0) != led_state_prev)
   {
     // led state changed
-    GPIO_PinOutToggle(test_out_1_PORT, test_out_1_PIN);
     //sl_pwm_set_duty_cycle(&sl_pwm_pulse_1, duty);
     duty += 10;
     if(duty > 90)
@@ -95,7 +106,12 @@ void app_process_action(void)
       duty = 10;
     }
     //LDMA_StartTransfer(0, &ldmaTimer0Cfg, &ldmaTimer0Desc);
-    UARTDRV_TransmitB(sl_uartdrv_usart_usart_test_handle, &duty, 1);
+    UART_buf[0] = duty;
+    UART_buf[1] = duty + 1;
+    UART_buf[2] = duty + 2;
+    GPIO_PinOutSet(test_out_1_PORT, test_out_1_PIN);
+    UARTDRV_Transmit(sl_uartdrv_usart_usart_test_handle, UART_buf, 3, UART_cbk);
+    GPIO_PinOutClear(test_out_1_PORT, test_out_1_PIN);
     //UARTDRV_ForceTransmit(sl_uartdrv_usart_usart_test_handle, &duty, 1);
   }
 
