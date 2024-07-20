@@ -31,6 +31,7 @@ target_compile_definitions(ssvsc_test PUBLIC
 
 target_compile_options(ssvsc_test PUBLIC
     # Set additional compiler flags here
+    "-O0"
 )
 
 target_link_options(ssvsc_test PUBLIC

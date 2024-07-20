@@ -57,9 +57,9 @@
   }
 
 #define PWM_SIZE  4
-uint32_t pwmBuffer[PWM_SIZE] = { 99, 2225, 10, 7775};
-//static const LDMA_TransferCfg_t ldmaTimer0Cfg = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(ldmaPeripheralSignal_TIMER0_UFOF);
-//static const LDMA_Descriptor_t ldmaTimer0Desc = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_M2P_WORD(pwmBuffer, &TIMER0->CC[0].OCB, PWM_SIZE);
+uint32_t pwmBuffer[PWM_SIZE] = { 199, 2225, 10, 7775};
+static LDMA_TransferCfg_t ldmaTimer0Cfg = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(ldmaPeripheralSignal_TIMER0_UFOF);
+static LDMA_Descriptor_t ldmaTimer0Desc = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_M2P_WORD(pwmBuffer, &TIMER0->CC[0].OCB, PWM_SIZE);
 uint8_t UART_buf[3];
 
 void UART_cbk(UARTDRV_Handle_t handle,
@@ -73,6 +73,14 @@ void UART_cbk(UARTDRV_Handle_t handle,
   (void)transferCount;
 }
 
+bool timer_0_cbk(unsigned int channel, unsigned int sequenceNo, void *userParam)
+{
+  (void)channel;
+  (void)sequenceNo;
+  (void)userParam;
+  return false; //stop DMA transfers
+}
+
 /***************************************************************************//**
  * Initialize application.
  ******************************************************************************/
@@ -84,8 +92,8 @@ void app_init(void)
   sl_pwm_set_duty_cycle(&sl_pwm_pulse_1, 10);
   sl_pwm_start(&sl_pwm_pulse_1);
 
-  //LDMA_Init_t ldmaInit = LDMA_INIT_DEFAULT;
-  //LDMA_Init(&ldmaInit);
+  LDMA_Init_t ldmaInit = LDMA_INIT_DEFAULT;
+  LDMA_Init(&ldmaInit);
 }
 
 /***************************************************************************//**
@@ -105,7 +113,10 @@ void app_process_action(void)
     {
       duty = 10;
     }
-    //LDMA_StartTransfer(0, &ldmaTimer0Cfg, &ldmaTimer0Desc);
+    GPIO_PinOutSet(test_out_1_PORT, test_out_1_PIN);
+    //LDMA_StartTransfer(1, &ldmaTimer0Cfg, &ldmaTimer0Desc);
+    DMADRV_LdmaStartTransfer(1, &ldmaTimer0Cfg, &ldmaTimer0Desc, timer_0_cbk, NULL);
+    GPIO_PinOutClear(test_out_1_PORT, test_out_1_PIN);
     UART_buf[0] = duty;
     UART_buf[1] = duty + 1;
     UART_buf[2] = duty + 2;
