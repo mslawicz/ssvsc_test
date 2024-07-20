@@ -78,6 +78,7 @@ bool timer_0_cbk(unsigned int channel, unsigned int sequenceNo, void *userParam)
   (void)channel;
   (void)sequenceNo;
   (void)userParam;
+  GPIO_PinOutClear(test_out_2_PORT, test_out_2_PIN);
   return false; //stop DMA transfers
 }
 
@@ -89,8 +90,9 @@ void app_init(void)
   blink_init();
 
   GPIO_PinModeSet(test_out_1_PORT, test_out_1_PIN, gpioModePushPull, 0);
-  sl_pwm_set_duty_cycle(&sl_pwm_pulse_1, 10);
-  sl_pwm_start(&sl_pwm_pulse_1);
+  GPIO_PinModeSet(test_out_2_PORT, test_out_2_PIN, gpioModePushPull, 0);
+  //sl_pwm_set_duty_cycle(&sl_pwm_pulse_1, 10);
+  //sl_pwm_start(&sl_pwm_pulse_1);
 
   LDMA_Init_t ldmaInit = LDMA_INIT_DEFAULT;
   LDMA_Init(&ldmaInit);
@@ -114,6 +116,7 @@ void app_process_action(void)
       duty = 10;
     }
     GPIO_PinOutSet(test_out_1_PORT, test_out_1_PIN);
+    GPIO_PinOutSet(test_out_2_PORT, test_out_2_PIN);
     //LDMA_StartTransfer(1, &ldmaTimer0Cfg, &ldmaTimer0Desc);
     DMADRV_LdmaStartTransfer(1, &ldmaTimer0Cfg, &ldmaTimer0Desc, timer_0_cbk, NULL);
     GPIO_PinOutClear(test_out_1_PORT, test_out_1_PIN);

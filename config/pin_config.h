@@ -165,6 +165,13 @@
 #define _PIN                                     0
 #endif
 
+#ifndef test_out_2_PORT                         
+#define test_out_2_PORT                          gpioPortA
+#endif
+#ifndef test_out_2_PIN                          
+#define test_out_2_PIN                           4
+#endif
+
 #ifndef test_out_1_PORT                         
 #define test_out_1_PORT                          gpioPortD
 #endif
