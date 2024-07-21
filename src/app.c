@@ -22,6 +22,8 @@
 #include "sl_pwm_instances.h"
 #include "em_ldma.h"
 #include "sl_uartdrv_instances.h"
+#include "em_timer.h"
+#include "em_cmu.h"
 
 /**
  * @brief
@@ -57,9 +59,9 @@
   }
 
 #define PWM_SIZE  4
-uint32_t pwmBuffer[PWM_SIZE] = { 199, 2225, 10, 7775};
-static LDMA_TransferCfg_t ldmaTimer0Cfg = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(ldmaPeripheralSignal_TIMER0_UFOF);
-static LDMA_Descriptor_t ldmaTimer0Desc = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_M2P_WORD(pwmBuffer, &TIMER0->CC[0].OCB, PWM_SIZE);
+uint32_t pwmBuffer[PWM_SIZE] = { 50000, 300000, 10000, 150000};
+static LDMA_TransferCfg_t ldmaTimer0Cfg;
+static LDMA_Descriptor_t ldmaTimer0Desc;
 uint8_t UART_buf[3];
 
 void UART_cbk(UARTDRV_Handle_t handle,
@@ -91,11 +93,16 @@ void app_init(void)
 
   GPIO_PinModeSet(test_out_1_PORT, test_out_1_PIN, gpioModePushPull, 0);
   GPIO_PinModeSet(test_out_2_PORT, test_out_2_PIN, gpioModePushPull, 0);
-  //sl_pwm_set_duty_cycle(&sl_pwm_pulse_1, 10);
-  //sl_pwm_start(&sl_pwm_pulse_1);
 
+  // Configure LDMA
   LDMA_Init_t ldmaInit = LDMA_INIT_DEFAULT;
   LDMA_Init(&ldmaInit);
+  //Configure DMA transfer
+  ldmaTimer0Cfg = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(ldmaPeripheralSignal_TIMER0_UFOF);
+  ldmaTimer0Desc = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_M2P_WORD(pwmBuffer, &TIMER0->CC[0].OCB, PWM_SIZE);  
+
+  //sl_pwm_set_duty_cycle(&sl_pwm_pulse_1, 50);
+  sl_pwm_start(&sl_pwm_pulse_1);
 }
 
 /***************************************************************************//**
@@ -109,7 +116,6 @@ void app_process_action(void)
   if(sl_led_get_state(&sl_led_led0) != led_state_prev)
   {
     // led state changed
-    //sl_pwm_set_duty_cycle(&sl_pwm_pulse_1, duty);
     duty += 10;
     if(duty > 90)
     {
@@ -117,8 +123,18 @@ void app_process_action(void)
     }
     GPIO_PinOutSet(test_out_1_PORT, test_out_1_PIN);
     GPIO_PinOutSet(test_out_2_PORT, test_out_2_PIN);
-    //LDMA_StartTransfer(1, &ldmaTimer0Cfg, &ldmaTimer0Desc);
-    DMADRV_LdmaStartTransfer(1, &ldmaTimer0Cfg, &ldmaTimer0Desc, timer_0_cbk, NULL);
+    static uint8_t transf = 1;
+    if(transf != 0)
+    {
+      LDMA_StartTransfer(1, &ldmaTimer0Cfg, &ldmaTimer0Desc);
+      //DMADRV_LdmaStartTransfer(1, &ldmaTimer0Cfg, &ldmaTimer0Desc, timer_0_cbk, NULL);
+      transf = 0;
+    }
+    else
+    {
+      LDMA_StopTransfer(1);
+      transf = 1;
+    }
     GPIO_PinOutClear(test_out_1_PORT, test_out_1_PIN);
     UART_buf[0] = duty;
     UART_buf[1] = duty + 1;
@@ -126,7 +142,6 @@ void app_process_action(void)
     GPIO_PinOutSet(test_out_1_PORT, test_out_1_PIN);
     UARTDRV_Transmit(sl_uartdrv_usart_usart_test_handle, UART_buf, 3, UART_cbk);
     GPIO_PinOutClear(test_out_1_PORT, test_out_1_PIN);
-    //UARTDRV_ForceTransmit(sl_uartdrv_usart_usart_test_handle, &duty, 1);
   }
 
 }
