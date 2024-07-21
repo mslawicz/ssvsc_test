@@ -25,6 +25,8 @@
 #include "em_timer.h"
 #include "em_cmu.h"
 
+#define RAND_BIT  ((rand() % 2) == 0 ? 33 : 66)
+
 /**
  * @brief
  *   DMA descriptor initializer for word transfers from memory to a peripheral.
@@ -63,7 +65,7 @@
 uint32_t pwmBuffer[PWM_SIZE];
 static LDMA_TransferCfg_t ldmaTimer0Cfg;
 static LDMA_Descriptor_t ldmaTimer0Desc;
-uint8_t UART_buf[3];
+uint8_t UART_buf[4];
 
 void UART_cbk(UARTDRV_Handle_t handle,
               Ecode_t transferStatus,
@@ -108,7 +110,7 @@ void app_init(void)
   LDMA_Init(&ldmaInit);
   //Configure DMA transfer
   ldmaTimer0Cfg = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(ldmaPeripheralSignal_TIMER0_CC0);  //use CC0 here, not UFOF !
-  ldmaTimer0Desc = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_M2P_WORD(pwmBuffer, &TIMER0->CC[0].OCB, PWM_SIZE);  
+  ldmaTimer0Desc = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_M2P_WORD(pwmBuffer, &TIMER0->CC[0].OC, PWM_SIZE);  
 
   // start PWM with 0 duty (no wave)
   sl_pwm_set_duty_cycle(&sl_pwm_pulse_1, 0);
@@ -120,34 +122,26 @@ void app_init(void)
  ******************************************************************************/
 void app_process_action(void)
 {
-  static uint8_t duty = 10;
   sl_led_state_t led_state_prev = sl_led_get_state(&sl_led_led0);
   blink_process_action();
   if(sl_led_get_state(&sl_led_led0) != led_state_prev)
   {
     // led state changed
-    duty += 10;
-    if(duty > 50)
-    {
-      duty = 10;
-    }
     GPIO_PinOutSet(test_out_1_PORT, test_out_1_PIN);
     GPIO_PinOutSet(test_out_2_PORT, test_out_2_PIN);
 
-    pwmBuffer[0] = dutyToCC(&sl_pwm_pulse_1, duty);
-    pwmBuffer[1] = dutyToCC(&sl_pwm_pulse_1, duty + 10);
-    pwmBuffer[2] = dutyToCC(&sl_pwm_pulse_1, duty + 20);
-    pwmBuffer[3] = dutyToCC(&sl_pwm_pulse_1, duty + 30);
+    UART_buf[0] = RAND_BIT;
+    pwmBuffer[0] = dutyToCC(&sl_pwm_pulse_1, UART_buf[0]);
+    UART_buf[1] = RAND_BIT;
+    pwmBuffer[1] = dutyToCC(&sl_pwm_pulse_1, UART_buf[1]);
+    UART_buf[2] = RAND_BIT;
+    pwmBuffer[2] = dutyToCC(&sl_pwm_pulse_1, UART_buf[2]);
+    UART_buf[3] = RAND_BIT;
+    pwmBuffer[3] = dutyToCC(&sl_pwm_pulse_1, UART_buf[3]);        
     pwmBuffer[4] = 0;
     //LDMA_StartTransfer(1, &ldmaTimer0Cfg, &ldmaTimer0Desc);   //version without callback
     DMADRV_LdmaStartTransfer(1, &ldmaTimer0Cfg, &ldmaTimer0Desc, timer_0_cbk, NULL);  //version with callback (not really used here)
-
-    GPIO_PinOutClear(test_out_1_PORT, test_out_1_PIN);
-    UART_buf[0] = duty;
-    UART_buf[1] = duty + 1;
-    UART_buf[2] = duty + 2;
-    GPIO_PinOutSet(test_out_1_PORT, test_out_1_PIN);
-    UARTDRV_Transmit(sl_uartdrv_usart_usart_test_handle, UART_buf, 3, UART_cbk);
+    UARTDRV_Transmit(sl_uartdrv_usart_usart_test_handle, UART_buf, 4, UART_cbk);
     GPIO_PinOutClear(test_out_1_PORT, test_out_1_PIN);
   }
 
