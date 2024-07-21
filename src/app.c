@@ -58,8 +58,9 @@
     }                                                     \
   }
 
-#define PWM_SIZE  4
-uint32_t pwmBuffer[PWM_SIZE] = { 50000, 300000, 10000, 150000};
+
+#define PWM_SIZE  5
+uint32_t pwmBuffer[PWM_SIZE];
 static LDMA_TransferCfg_t ldmaTimer0Cfg;
 static LDMA_Descriptor_t ldmaTimer0Desc;
 uint8_t UART_buf[3];
@@ -84,6 +85,14 @@ bool timer_0_cbk(unsigned int channel, unsigned int sequenceNo, void *userParam)
   return false; //stop DMA transfers
 }
 
+//calculate timer register CC value from PWM duty value
+uint32_t dutyToCC(sl_pwm_instance_t* pwmInstance, uint8_t pct)
+{
+  // read timer top value
+  uint32_t top = TIMER_TopGet(pwmInstance->timer);
+  return top * pct / 100;
+}
+
 /***************************************************************************//**
  * Initialize application.
  ******************************************************************************/
@@ -98,10 +107,11 @@ void app_init(void)
   LDMA_Init_t ldmaInit = LDMA_INIT_DEFAULT;
   LDMA_Init(&ldmaInit);
   //Configure DMA transfer
-  ldmaTimer0Cfg = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(ldmaPeripheralSignal_TIMER0_UFOF);
+  ldmaTimer0Cfg = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(ldmaPeripheralSignal_TIMER0_CC0);  //use CC0 here, not UFOF !
   ldmaTimer0Desc = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_M2P_WORD(pwmBuffer, &TIMER0->CC[0].OCB, PWM_SIZE);  
 
-  sl_pwm_set_duty_cycle(&sl_pwm_pulse_1, 50);
+  // start PWM with 0 duty (no wave)
+  sl_pwm_set_duty_cycle(&sl_pwm_pulse_1, 0);
   sl_pwm_start(&sl_pwm_pulse_1);
 }
 
@@ -117,24 +127,21 @@ void app_process_action(void)
   {
     // led state changed
     duty += 10;
-    if(duty > 90)
+    if(duty > 50)
     {
       duty = 10;
     }
     GPIO_PinOutSet(test_out_1_PORT, test_out_1_PIN);
     GPIO_PinOutSet(test_out_2_PORT, test_out_2_PIN);
-    static uint8_t transf = 1;
-    if(transf != 0)
-    {    
-      //LDMA_StartTransfer(1, &ldmaTimer0Cfg, &ldmaTimer0Desc);
-      //DMADRV_LdmaStartTransfer(1, &ldmaTimer0Cfg, &ldmaTimer0Desc, timer_0_cbk, NULL);
-      transf = 0;
-    }
-    else
-    {
-      transf = 1;
-    }
-    TIMER0->CC[0].OCB = duty * 3000;
+
+    pwmBuffer[0] = dutyToCC(&sl_pwm_pulse_1, duty);
+    pwmBuffer[1] = dutyToCC(&sl_pwm_pulse_1, duty + 10);
+    pwmBuffer[2] = dutyToCC(&sl_pwm_pulse_1, duty + 20);
+    pwmBuffer[3] = dutyToCC(&sl_pwm_pulse_1, duty + 30);
+    pwmBuffer[4] = 0;
+    //LDMA_StartTransfer(1, &ldmaTimer0Cfg, &ldmaTimer0Desc);   //version without callback
+    DMADRV_LdmaStartTransfer(1, &ldmaTimer0Cfg, &ldmaTimer0Desc, timer_0_cbk, NULL);  //version with callback (not really used here)
+
     GPIO_PinOutClear(test_out_1_PORT, test_out_1_PIN);
     UART_buf[0] = duty;
     UART_buf[1] = duty + 1;
