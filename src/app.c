@@ -101,7 +101,7 @@ void app_init(void)
   ldmaTimer0Cfg = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(ldmaPeripheralSignal_TIMER0_UFOF);
   ldmaTimer0Desc = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_M2P_WORD(pwmBuffer, &TIMER0->CC[0].OCB, PWM_SIZE);  
 
-  //sl_pwm_set_duty_cycle(&sl_pwm_pulse_1, 50);
+  sl_pwm_set_duty_cycle(&sl_pwm_pulse_1, 50);
   sl_pwm_start(&sl_pwm_pulse_1);
 }
 
@@ -125,16 +125,16 @@ void app_process_action(void)
     GPIO_PinOutSet(test_out_2_PORT, test_out_2_PIN);
     static uint8_t transf = 1;
     if(transf != 0)
-    {
-      LDMA_StartTransfer(1, &ldmaTimer0Cfg, &ldmaTimer0Desc);
+    {    
+      //LDMA_StartTransfer(1, &ldmaTimer0Cfg, &ldmaTimer0Desc);
       //DMADRV_LdmaStartTransfer(1, &ldmaTimer0Cfg, &ldmaTimer0Desc, timer_0_cbk, NULL);
       transf = 0;
     }
     else
     {
-      LDMA_StopTransfer(1);
       transf = 1;
     }
+    TIMER0->CC[0].OCB = duty * 3000;
     GPIO_PinOutClear(test_out_1_PORT, test_out_1_PIN);
     UART_buf[0] = duty;
     UART_buf[1] = duty + 1;
